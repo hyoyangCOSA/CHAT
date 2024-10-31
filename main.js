@@ -157,7 +157,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('count', (msg) => {
-        //console.log("서버가 일반 메시지를 수신했습니다");
+        console.log("서버가 카운트 메시지를 수신했습니다");
         io.emit('count', msg); // 모든 클라이언트에게 메시지 전달
     });
 

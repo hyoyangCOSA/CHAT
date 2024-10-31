@@ -114,7 +114,7 @@ io.on('connection', (socket) => {
         console.log("서버가 정답제출을 수신했습니다");
         if(answer == currentWord){
             console.log("클라이언트가 정답을 맞혔습니다");
-            count += currentWord.length;
+            count += currentWord.length*2;
             renewCount();
             io.emit('system', `SYSTEM : "${answer}"를 정답으로 제출, 정답입니다. 새로운 제시어로 변경됩니다`);
             newWord();

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send</title>
+    <link rel="stylesheet" href="send.css">
+    <link rel="stylesheet" href="font.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
+</head>
+<body>
+    <h1>금지어 : </h1>
+    <h2 id = "answer">제시어 : </h2>
+    <h2 id="count">맞춘 횟수 : </h2>
+    <ul id = "chat"></ul>
+
+    <form id="form">
+        <input id="input" autocomplete="off" placeholder="Enter키를 눌러 전송하세요"/>
+        <button type="submit" onclick="prepareScroll(); sendMessage() ;return false;">전송</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const maxcount = 15;
+        let count = 0;
+
+        const socket = io();
+    
+        // 준비 함수, 약간의 시간을 두어 scroll 함수를 호출하기
+        function prepareScroll() {
+            setTimeout(scrollUl, 50);
+        }
+
+        // scroll 함수
+        function scrollUl() {
+        // 채팅창 form 안의 ul 요소, (ul 요소 안에 채팅 내용들이 li 요소로 입력된다.)
+            let chatUl = document.getElementById('chat');
+            chatUl.scrollTop = chatUl.scrollHeight; // 스크롤의 위치를 최하단으로
+        }
+
+        // 메시지 전송 함수
+        function sendMessage(){
+            const input = document.getElementById('input');
+            if (input.value) {
+                socket.emit('send', input.value);
+                input.value = '';//인풋 초기화
+            }
+        }
+
+        // 서버로부터 메시지를 받아 리스트에 추가
+        socket.on('send', (msg) => {
+            if(count>=maxcount){
+            let chatting = document.querySelectorAll("li");
+            chatting[0].remove();
+            count--;
+            }
+            console.log("메시지를 클라이언트가 수신함");
+            const item = document.createElement('li');
+            item.textContent = msg;
+            document.getElementById('chat').appendChild(item);//자식 추가 메소드
+            count++;
+            prepareScroll();
+        });
+
+        socket.on('system', (msg) => {
+            if(count>=maxcount){
+            let chatting = document.querySelectorAll("li");
+            chatting[0].remove();
+            count--;
+            }
+            console.log("시스템 메시지를 클라이언트가 수신함");
+            const item = document.createElement('li');
+            item.textContent = msg;
+            document.getElementById('chat').appendChild(item);//자식 추가 메소드
+            count++;
+            prepareScroll();
+        });
+
+        socket.on('word', (msg) => {
+            let answer = document.getElementById('answer');
+            answer.innerText = `제시어 : ${msg}`;
+        });
+
+        socket.on('count', (msg) => {
+            let answer = document.getElementById('count');
+            answer.innerText = `점수 : ${msg}`;
+        });
+
+
+
+      </script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+const words = [];
+
+export{words}

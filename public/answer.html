@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Answer</title>
+    <link rel="stylesheet" href="answer.css">
+    <link rel="stylesheet" href="font.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
+</head>
+<body>
+    
+    <h2 id="count">점수 : </h2>
+    <ul id = "chat"></ul>
+    <form id="form">
+        <input id="input" autocomplete="off" placeholder="정답을 입력하세요"/>
+        <button type="submit" onclick="prepareScroll(); answerMessage() ;return false;">전송</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const maxcount = 15;
+        let count = 0;
+        const socket = io();
+    
+
+        function prepareScroll() {
+            setTimeout(scrollUl, 50);
+        }
+
+        // scroll 함수
+        function scrollUl() {
+        // 채팅창 form 안의 ul 요소, (ul 요소 안에 채팅 내용들이 li 요소로 입력된다.)
+            let chatUl = document.getElementById('chat');
+            chatUl.scrollTop = chatUl.scrollHeight; // 스크롤의 위치를 최하단으로
+        }
+
+
+
+        // 메시지 전송 함수
+        function answerMessage(){
+            const input = document.getElementById('input');
+            if (input.value) {
+                socket.emit('answer', input.value);
+                input.value = '';//인풋 초기화
+            }
+        }
+
+ // 서버로부터 메시지를 받아 리스트에 추가
+        socket.on('send', (msg) => {
+            if(count>=maxcount){
+            let chatting = document.querySelectorAll("li");
+            chatting[0].remove();
+            count--;
+            }
+            console.log("메시지를 클라이언트가 수신함");
+            const item = document.createElement('li');
+            item.textContent = msg;
+            document.getElementById('chat').appendChild(item);//자식 추가 메소드
+            count++;
+            prepareScroll();
+        });
+        
+        socket.on('system', (msg) => {
+            if(count>=maxcount){
+                let chatting = document.querySelectorAll("li");
+                chatting[0].remove();
+                count--;
+            }
+            console.log("시스템 메시지를 클라이언트가 수신함");
+            const item = document.createElement('li');
+            item.textContent = msg;
+            document.getElementById('chat').appendChild(item);//자식 추가 메소드
+            count++;
+            prepareScroll();
+        });
+
+        socket.on('count', (msg) => {
+            let answer = document.getElementById('count');
+            answer.innerText = `맞춘 횟수 : ${msg}`;
+        });
+
+      </script>
+</body>
+</html>

@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
 </head>
 <body>
-    
+    <h1 id="length">글자 수 : </h1>
     <h2 id="count">점수 : </h2>
     <ul id = "chat"></ul>
     <form id="form">
@@ -77,6 +77,11 @@
         socket.on('count', (msg) => {
             let answer = document.getElementById('count');
             answer.innerText = `점수 : ${msg}`;
+        });
+
+        socket.on('length', (msg) => {
+            let $length = document.getElementById('length');
+            $length.innerText = `글자 수 : ${msg}`;
         });
 
       </script>

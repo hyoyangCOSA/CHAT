@@ -7,6 +7,15 @@ const app = express();
 const mainServer = http.createServer(app);
 const io = new Server(mainServer);
 
+const CHO_LIST = [
+    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 
+    'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
+];
+
+
+
+
+
 const port = 3000;
 
 const words = [
@@ -70,7 +79,7 @@ function getRandomInt(max){
 }
 
 let currentWord = "";
-
+let banWord = "";
 
 io.on('connection', (socket) => {
     let count = 0;
@@ -78,22 +87,64 @@ io.on('connection', (socket) => {
     //내부 함수 정의
     function newWord(){
         currentWord = words[getRandomInt(words.length)];
-        console.log("새 단어로 변경됨" + currentWord);
+        console.log("새 단어로 변경됨 : " + currentWord);
         io.emit('word', currentWord);
+        io.emit('length', currentWord.length);
     }
     function renewCount(){
         console.log("카운트를 갱신합니다 : " + count);
         io.emit('count', count);
     }
-    
+
+    function renewBan(){
+        banWord = getCho(currentWord[getRandomInt(currentWord.length)]);
+        console.log("금지어를 갱신합니다 : " + banWord);
+        io.emit('ban', banWord);
+    }
+
+    // 초성 추출 함수
+    function getCho(character) {
+        const uniCode = character.charCodeAt(0);
+        if (uniCode < 0xAC00 || uniCode > 0xD7A3) return null; // 한글 범위 외 문자 예외 처리
+        const choIndex = Math.floor((uniCode - 0xAC00) / 588);
+        return CHO_LIST[choIndex];
+    }
+
+    // 문장에 특정 초성이 있는지 확인하는 함수
+    function containsCho(sentence, targetCho) {
+        for (const char of sentence) {
+            if (getCho(char) === targetCho) return true;
+        }
+        return false;
+    }
+
+    function containsWord(sentence, target){
+        for(const targetChar of target){
+            for(const char of sentence){
+                if(char==targetChar){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
     //접속 작동 시작
     console.log('사용자 연결됨');
     newWord();
     renewCount();
-
+    renewBan();
+    
     socket.on('send', (msg) => {
         //console.log("서버가 일반 메시지를 수신했습니다");
-        io.emit('send', msg); // 모든 클라이언트에게 메시지 전달
+        if(containsWord(msg, currentWord) || containsCho(msg, banWord)){
+            io.emit('system', "SYSTEM : 금지된 단어나 초성을 사용하였습니다");
+        }
+        else{
+            io.emit('send', msg); // 모든 클라이언트에게 메시지 전달
+        }
+        
     });
 
     socket.on('system', (msg) => {

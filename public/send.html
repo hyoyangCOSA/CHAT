@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
 </head>
 <body>
-    <h1>금지어 : </h1>
+    <h1 id="ban">금지 초성 : </h1>
     <h2 id = "answer">제시어 : </h2>
     <h2 id="count">맞춘 횟수 : </h2>
     <ul id = "chat"></ul>
@@ -85,7 +85,10 @@
             answer.innerText = `점수 : ${msg}`;
         });
 
-
+        socket.on('ban', (msg) => {
+            let ban = document.getElementById('ban');
+            ban.innerText = `금지 초성 : ${msg}`;
+        });
 
       </script>
 </body>

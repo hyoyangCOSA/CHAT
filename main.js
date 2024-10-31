@@ -169,6 +169,7 @@ io.on('connection', (socket) => {
             renewCount();
             io.emit('system', `SYSTEM : "${answer}"를 정답으로 제출, 정답입니다. 새로운 제시어로 변경됩니다`);
             newWord();
+            renewBan();
 
         }
         else{

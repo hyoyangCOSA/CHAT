@@ -1,3 +1,0 @@
-const words = [];
-
-export{words}
